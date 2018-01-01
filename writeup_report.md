@@ -155,9 +155,9 @@ newwarp = cv2.warpPerspective(color_warp, Minv, (img.shape[1], img.shape[0]))
 
 #### 1. Final video output
 
-Here's a [link to my video result](https://www.youtube.com/watch?v=Sj5GB-UKWRE)
+Here's a [link to my video result](https://www.youtube.com/watch?v=g2R47Rjs-3Y)
 <div align="left">
-  <a href="https://www.youtube.com/watch?v=Sj5GB-UKWRE"><img src="https://img.youtube.com/vi/Sj5GB-UKWRE/0.jpg" alt="IMAGE ALT TEXT"></a>
+  <a href="https://www.youtube.com/watch?v=g2R47Rjs-3Y"><img src="https://img.youtube.com/vi/g2R47Rjs-3Y/0.jpg" alt="IMAGE ALT TEXT"></a>
 </div>
 
 ---
