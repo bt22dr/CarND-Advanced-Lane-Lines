@@ -44,7 +44,7 @@ You're reading it!
 
 #### 1. Computed the camera matrix and distortion coefficients
 
-베이스 코드에서 제공하는 calibration 이미지들(./camera_cal/*.jpg)과 OpenCV의 cv2.findChessboardCorners() 함수로 얻은 `imgpoints`와 `objpoints`를 인자로 cv2.calibrateCamera()를 호출하여 camera matrix와 distortion coefficients를 얻는다. 이렇게 얻은 정보를 이용하여 cv2.undistort()를 호출하면 최종적으로 distortion이 보정된 이미지를 얻을 수 있다. 
+We call cv2.findChessboardCorners() and cv2.calibrateCamera() function with the parameters `imgpoints` and `objpoints` provided from the template project(./camera_cal/*.jpg), and then we can obtain the camera matrix and distortion coefficients. Using this information, you can call cv2.undistort() to get the final distortion corrected image.
 
 ![alt text][image1]
 
@@ -52,31 +52,31 @@ You're reading it!
 
 #### 1. Provide an example of a distortion-corrected image.
 
-제공된 테스트 이미지에 distortion correction를 수행한 결과는 아래와 같다. 
+The results of the distortion correction on the test image is as follows.
 
 ![alt text][image2]
 
 #### 2. Create a thresholded binary image
 
-차선 영역에서 강하게 나타나는 특징을 threshold 처리하여 일단 binary image로 만들고 나면 그 이후에는 차선 검출을 수월하게 진행할 수 있다. 간단하게는 x, y 방향으로 sobel filter를 적용하여 edge를 잡아내면 검정색 아스팔트에서 노란색과 하얀색 차선을 쉽게 구별할 수 있다. 
+Once the features that appear strong in the lane area is thresholded and made into a binary image, the lane detection can proceed easily using Sobel filter.
 
 ![alt text][image3]
 
-그리고 상식적으로 차선이 수평선 보다는 수직선에 가까운 형태로 나타난다는 점을 이용해서 gradient의 방향을 차선의 edge 추출에 활용할 수도 있다. 
+Also, it is possible to use the gradient direction to detect the lane lines by using the fact that the lane line is more likely vertical than horizontal in common sense.
 
 ![alt text][image4]
 
-위에서처럼 edge 기반으로 접근하게 되면 그림자의 영향이나 아스팔트가 밝은색 계열일 때 검출이 어렵다. 이런 문제를 해결하기 위해 빛의 변화에 덜 민감한 색상 체계를 사용하여 차선 색상에 해당하는 부분을 추출해내는 것도 좋은 방법이 될 수 있다. 여기에서는 HLS color space의 L과 S 채널, LUV의 L 채널, LAB의 B 채널을 병합하여 사용하였다. 
+As shown above, edge-based approaches make it difficult to detect lane lines when the effect of shadows or luminance variation is strong. To solve this problem, it may be a good idea to use a color scheme that is less sensitive to changes in light. Here, the L and S channels of the HLS color space, the L channel of the LUV, and the B channel of the LAB are used in combination.
 
 ![alt text][image5]
 
-위 3가지 binary image를 모두 combine하여 각각 RGB 채널로 나타내면 아래와 같다. 
+Combine all of the above binary images into RGB channels.
 
 ![alt text][image6]
 
 #### 3. Perspective transform
 
-베이스 프로젝트에서 제공한 writeup_template을 참고하여 아래와 같이 perspectivetransform을 위한 source와 destination 영역을 지정하였다.
+The source and destination regions for the perspective transform as shown below. (refer to the [writeup_template.md of the template project](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md))
 
 ```python
 img_size = result.shape[1::-1]
@@ -102,23 +102,23 @@ This resulted in the following source and destination points:
 | 1126.7, 720   | 960, 720      |
 | 695, 460      | 960, 0        |
 
-Warp한 결과는 아래 이미지에서 확인할 수 있다. 
+Warped image is as follows.
 
 ![alt text][image7]
 
 #### 4. Fit lane-line pixels
 
-thresholded binary image를 Warp하여 왼쪽과 오른쪽에서 나타나는 point들을 각각 왼쪽과 오른쪽 lane line이라고 가정할 수 있다. 두 영역에 속한 point들을 이용해 2차 곡선으로 fitting하면 아래와 같은 결과를 얻을 수 있다. 
+In the warped image of the thresholded binary image, we can consider the left and right part of the points as left and right lane lines respectively. Fitting the points with a quadratic curve produces the following results.
 
 ![alt text][image8]
 
 #### 5. Calculated the curvature and the vehicle position
 
-x와 y차원에서의 픽셀 당 거리값의 추정값(`ym_per_pix`, `xm_per_pix`)을 이용하여 다음 공식으로 곡률반경을 구한다. 
+Using the estimated value of the real distance per pixel in the image, the radius of curvature is obtained by the following formula.
 
 ![alt text][image9] 
 
-차선으로부터 차 중심의 거리는 단순히 카메라의 위치가 차 중심이라고 가정하고 단순 계산한다. 
+The distance from the lane line to the center of the vehicle is calculated simply by assuming that the position of the camera is the center of the car.
 
 ```python
 # Define conversions in x and y from pixels space to meters
@@ -144,7 +144,7 @@ print('left/right x position:', left_fit_pos, right_fit_pos)
 
 #### 6. Warp back 
 
-warp된 상태에서 표시한 lane line을 다시 원래 이미지에 덮어 씌우는 것은 앞에서 수행한 perspective transform의 역변환을 통해 가능하며 아래와 같은 코드로 실행 가능하다. 
+Warping back the lane line to the original image is possible through the inverse transformation of the previous perspective transform, and can be simply implemented with the following code.
 
 ```python
 Minv = cv2.getPerspectiveTransform(dst, src)
@@ -159,7 +159,7 @@ newwarp = cv2.warpPerspective(color_warp, Minv, (img.shape[1], img.shape[0]))
 
 #### 1. Final video output
 
-위에서 만든 image processing pipeline을 비디오에 적용할 때 최종 결과를 좀 더 robust하고 자연스럽게 만들기 위해 Reset, Smoothing 코드를 추가하였다. 연속적으로 5 프레임 동안 sanity check에 실패할 경우엔 기존 fitting 정보를 초기화하고 fitting line을 새로 구하도록 하였다. 
+We added the 'Reset' and 'Smoothing' code to make the final result more robust and natural when applying the image processing pipeline to the video. If the sanity check fails for 5 consecutive frames, the existing information is initialized and a fitting line is computed from scratch.
 
 ```python
 if left_lane_line.best_fit is None or right_lane_line.best_fit is None:
@@ -170,7 +170,8 @@ if left_lane_line.best_fit is None or right_lane_line.best_fit is None:
                                                     right_lane_line.best_fit)
 ```
 
-또한 아래와 같이 fitting coefficient를 구할 때 5 프레임 정도의 moving average를 사용하여 몇몇 프레임에서 fitting line을 찾지 못하더라도 자연스럽게 smoothing되는 효과를 주었다. 
+Using a moving average of fitting line coefficient for 5 frames, the effect of smoothing is obtained even if the fitting line is occasionally not found in some frames.
+
 ```python
 left_lane_line.best_fit * 0.8 + left_lane_line.current_fit * 0.2
 right_lane_line.best_fit * 0.8 + right_lane_line.current_fit * 0.2
@@ -187,4 +188,6 @@ Here's a [link to my video result](https://www.youtube.com/watch?v=g2R47Rjs-3Y)
 
 #### 1. Briefly discuss any problems / issues 
 
-HSL, LUV, LAB 등 여러 색상의 이미지를 사용했음에도 특정 상황에서는(예를 들어, 밝은색 계통의 도로 상에서 그림자 때문에 차선 이외의 곳에서 edge가 강하게 나타나는 경우 등) 그림자의 경계를 차선으로 인식하는 경향이 강하게 나타나는 단점을 발견하였다. 
+Even in the case of using all HSL, LUV and LAB color channels, I found the tendency to recognize the boundaries of shadows as lane lines at the bright-colored pavement.
+
+
