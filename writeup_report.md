@@ -66,7 +66,7 @@ You're reading it!
 
 ![alt text][image4]
 
-위에서처럼 edge 기반으로 접근하게 되면 그림자의 영향이나 아스팔트가 밝은색 계열일 때 검출이 어렵다. 이런 문제를 해결하기 위해 빛의 변화에 덜 민감한 색상 체계를 사용하여 차선 색상에 해당하는 부분을 추출해내는 것도 좋은 방법이 될 수 있다. 여기에서는 HLS color space에서 L과 S 채널을 사용하였다. 
+위에서처럼 edge 기반으로 접근하게 되면 그림자의 영향이나 아스팔트가 밝은색 계열일 때 검출이 어렵다. 이런 문제를 해결하기 위해 빛의 변화에 덜 민감한 색상 체계를 사용하여 차선 색상에 해당하는 부분을 추출해내는 것도 좋은 방법이 될 수 있다. 여기에서는 HLS color space의 L과 S 채널, LUV의 L 채널, LAB의 B 채널을 병합하여 사용하였다. 
 
 ![alt text][image5]
 
@@ -114,7 +114,11 @@ thresholded binary image를 Warp하여 왼쪽과 오른쪽에서 나타나는 po
 
 #### 5. Calculated the curvature and the vehicle position
 
-x와 y차원에서의 픽셀 당 거리값의 추정값(`ym_per_pix`, `xm_per_pix`)을 이용하여 다음 공식으로 곡률반경을 구한다. ![alt text][image9] 차선으로부터 차 중심의 거리는 단순히 카메라의 위치가 차 중심이라고 가정하고 단순 계산한다. 
+x와 y차원에서의 픽셀 당 거리값의 추정값(`ym_per_pix`, `xm_per_pix`)을 이용하여 다음 공식으로 곡률반경을 구한다. 
+
+![alt text][image9] 
+
+차선으로부터 차 중심의 거리는 단순히 카메라의 위치가 차 중심이라고 가정하고 단순 계산한다. 
 
 ```python
 # Define conversions in x and y from pixels space to meters
@@ -155,6 +159,23 @@ newwarp = cv2.warpPerspective(color_warp, Minv, (img.shape[1], img.shape[0]))
 
 #### 1. Final video output
 
+위에서 만든 image processing pipeline을 비디오에 적용할 때 최종 결과를 좀 더 robust하고 자연스럽게 만들기 위해 Reset, Smoothing 코드를 추가하였다. 연속적으로 5 프레임 동안 sanity check에 실패할 경우엔 기존 fitting 정보를 초기화하고 fitting line을 새로 구하도록 하였다. 
+
+```python
+if left_lane_line.best_fit is None or right_lane_line.best_fit is None:
+        left_fit, right_fit = fit_lines_from_scratch(binary_warped)
+    else :
+        left_fit, right_fit = fit_lines_with_previous_lines(binary_warped, 
+                                                    left_lane_line.best_fit, 
+                                                    right_lane_line.best_fit)
+```
+
+또한 아래와 같이 fitting coefficient를 구할 때 5 프레임 정도의 moving average를 사용하여 몇몇 프레임에서 fitting line을 찾지 못하더라도 자연스럽게 smoothing되는 효과를 주었다. 
+```python
+left_lane_line.best_fit * 0.8 + left_lane_line.current_fit * 0.2
+right_lane_line.best_fit * 0.8 + right_lane_line.current_fit * 0.2
+```
+
 Here's a [link to my video result](https://www.youtube.com/watch?v=Sj5GB-UKWRE)
 <div align="left">
   <a href="https://www.youtube.com/watch?v=Sj5GB-UKWRE"><img src="https://img.youtube.com/vi/Sj5GB-UKWRE/0.jpg" alt="IMAGE ALT TEXT"></a>
@@ -166,4 +187,4 @@ Here's a [link to my video result](https://www.youtube.com/watch?v=Sj5GB-UKWRE)
 
 #### 1. Briefly discuss any problems / issues 
 
-HSL 색상 이미지를 사용했음에도 특정 상황에서는(예를 들어, 밝은색 계통의 도로이면서 그림자 때문에 차선 이외의 곳에서 edge가 강하게 나타나는 경우 등) 그림자의 경계를 차선으로 인식하는 경향이 강하게 나타나는 단점을 발견하였다. 
+HSL, LUV, LAB 등 여러 색상의 이미지를 사용했음에도 특정 상황에서는(예를 들어, 밝은색 계통의 도로 상에서 그림자 때문에 차선 이외의 곳에서 edge가 강하게 나타나는 경우 등) 그림자의 경계를 차선으로 인식하는 경향이 강하게 나타나는 단점을 발견하였다. 
