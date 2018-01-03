@@ -176,9 +176,9 @@ left_lane_line.best_fit * 0.8 + left_lane_line.current_fit * 0.2
 right_lane_line.best_fit * 0.8 + right_lane_line.current_fit * 0.2
 ```
 
-Here's a [link to my video result](https://www.youtube.com/watch?v=Sj5GB-UKWRE)
+Here's a [link to my video result](https://www.youtube.com/watch?v=g2R47Rjs-3Y)
 <div align="left">
-  <a href="https://www.youtube.com/watch?v=Sj5GB-UKWRE"><img src="https://img.youtube.com/vi/Sj5GB-UKWRE/0.jpg" alt="IMAGE ALT TEXT"></a>
+  <a href="https://www.youtube.com/watch?v=g2R47Rjs-3Y"><img src="https://img.youtube.com/vi/g2R47Rjs-3Y/0.jpg" alt="IMAGE ALT TEXT"></a>
 </div>
 
 ---
